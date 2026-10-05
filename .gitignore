@@ -1,0 +1,4 @@
+paytrack.db
+*.db-journal
+__pycache__/
+.DS_Store
