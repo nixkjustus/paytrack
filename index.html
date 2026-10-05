@@ -3,7 +3,7 @@
 </style></head><body><main class="app" id="app"></main><div class="modal" id="modal"><div class="sheet" id="sheet"></div></div><script>
 const $=s=>document.querySelector(s), money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n); let DATA, WEEK_OFFSET=0, installPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
-if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('/sw.js').catch(()=>{});
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 async function api(path,opt={}){
   // Standalone website: all data stays in this browser, with no server required.
   return localApi(path,opt)
