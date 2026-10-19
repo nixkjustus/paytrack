@@ -3,7 +3,7 @@
 </style></head><body><main class="app" id="app"></main><div class="modal" id="modal"><div class="sheet" id="sheet"></div></div><script>
 const $=s=>document.querySelector(s), money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n); let DATA, WEEK_OFFSET=0, installPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
-if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js?v=3').catch(()=>{});
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js?v=4').catch(()=>{});
 async function api(path,opt={}){
   // Standalone website: all data stays in this browser, with no server required.
   return localApi(path,opt)
@@ -12,6 +12,8 @@ let memoryState={users:{},current:null,nextId:1};
 function readLocalState(){
   try{let value=localStorage.getItem('paytrack-data');if(value)return JSON.parse(value)}catch(e){}
   try{if(window.name&&window.name.startsWith('paytrack:'))return JSON.parse(window.name.slice(9))}catch(e){}
+  // Recover the local account from a durable cookie if Chrome removed site storage.
+  try{let hit=document.cookie.split('; ').find(x=>x.startsWith('paytrack-account='));if(hit){let a=JSON.parse(decodeURIComponent(hit.split('=').slice(1).join('='))),s={users:{},current:a.email,nextId:1};s.users[a.email]={...a,shifts:[]};return s}}catch(e){}
   return memoryState
 }
 function writeLocalState(state){
@@ -19,6 +21,8 @@ function writeLocalState(state){
   let value=JSON.stringify(state);
   try{localStorage.setItem('paytrack-data',value)}catch(e){}
   try{window.name='paytrack:'+value}catch(e){}
+  // Keep a small account-only recovery copy for the installed Chrome app.
+  try{if(state.current&&state.users[state.current]){let u=state.users[state.current],a={email:u.email,password:u.password,rate:u.rate,tax:u.tax,overtime:u.overtime,weekStart:u.weekStart,weekEnd:u.weekEnd};document.cookie='paytrack-account='+encodeURIComponent(JSON.stringify(a))+'; Max-Age=31536000; Path=/paytrack/; SameSite=Lax; Secure'}}catch(e){}
 }
 function localApi(path,opt={}){
   let state=readLocalState();
